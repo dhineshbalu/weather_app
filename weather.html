@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script>
+ var data;
+ $(document).ready(
+     function()
+     {
+        $("#enter1").click(function(){
+        var city = $("#city").val();
+        $.ajax({
+            type:"GET",
+            dataType: "jsonp",
+            url: "http://api.openweathermap.org/data/2.5/forecast?q=" + city + "&mode=xml&appid=08e126d5a04a75b9d9b46562020ec80f", 
+            success: function(result) 
+            {
+               console.log(result);
+          
+           $("#lat").text(result.city.coord.lat);
+           $("#lon").text(result.city.coord.lon);
+           $("#pop").text(result.city.population);
+           $("#temp").text(result.list[0].main.temp);
+           $("#humi").text(result.list[0].main.humidity);
+           $("#press").text(result.list[0].main.pressure);
+           },
+           error: (err) => {
+            console.log('In error callback');
+            console.log(err);
+        }
+    });
+
+   
+    });
+    $("#enter2").click(function() {
+        var city = $("#city").val();
+        $.ajax({
+            type:"GET",
+            dataType: "jsonp",
+            url: "http://api.openweathermap.org/data/2.5/forecast?q=" + city + "&mode=xml&appid=08e126d5a04a75b9d9b46562020ec80f", 
+            success: function(data) 
+            {
+            
+              dates = data.list.map(function(ele)
+            {
+                return ele.dt;
+            });
+
+            console.log(dates);
+
+            temps = data.list.map(function(ele)
+        {
+    return ele.main.temp;
+        });
+
+         console.log(temps);
+         plot(temps,dates);
+            },
+              error: (err) => {
+            console.log('In error callback');
+            console.log(err);
+        }
+      
+    });
+
+});
+
+    const plot = (tempArr, datesArr) => {
+        Highcharts.chart('container', {
+            chart: {
+                type: 'spline'
+            },
+            title: {
+                text: 'Monthly Average Temperature'
+            },
+            xAxis: {
+                categories: datesArr
+            },
+            yAxis: {
+                title: {
+                    text: 'Temperature'
+                },
+                labels: {
+                    formatter: function () { return this.value + '°'; }
+                }
+            },
+            tooltip: {
+                crosshairs: true,
+                shared: true
+            },
+            plotOptions: {
+                spline: {
+                    marker: {
+                        radius: 4,
+                        lineColor: '#666666',
+                        lineWidth: 1
+                    }
+                }
+            },
+            series: [{
+                name: city,
+                marker: {
+                    symbol: 'square'
+                },
+                data: tempArr
+
+            }]
+        });
+    }
+     });
+    
+
+
+
+
+  
+</script>
+</head>
+<body>
+        <form class="form-inline">
+            <div class="form-group">
+              <label>Enter city name </label>
+              <input type="text" class="form-control" id="city">
+            </div>
+            <button type="button" class="btn btn-primary" id="enter1">Get1</button>
+            <button type="button" class="btn btn-primary" id="enter2">Get2</button>
+        </form>
+
+       Latitude :  <p id="lat"></p>
+      Longitude :  <p id="lon"></p>
+       Population :  <p id="pop"></p>
+
+      Temperature :  <p id="temp"></p>
+       Humidity : <p id="humi"></p>
+       Pressure : <p id="press"></p>
+
+
+  <div id="container" style="width:100%;height:400px;"></div>
+  
+</body>
+</html>
